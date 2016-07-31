@@ -8,22 +8,35 @@ import logging
 from StringIO import StringIO
 from Queue import Queue, Empty
 from threading import Thread, RLock, current_thread
-from argparse import ArgumentParser
-from scutils.argparse_helper import ArgparseHelper
+from argparse import ArgumentParser, _HelpAction, _SubParsersAction
 from multi_thread_closing import MultiThreadClosing
+
+
+class ArgparseHelper(_HelpAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.print_help()
+        subparsers_actions = [
+            action for action in parser._actions
+            if isinstance(action, _SubParsersAction)]
+        for subparsers_action in subparsers_actions:
+            for choice, subparser in subparsers_action.choices.items():
+                print("Command '{}'".format(choice))
+                print(subparser.format_usage())
+
+        parser.exit()
 
 
 class CmdExecution(MultiThreadClosing):
 
     name = "cmd_execution"
 
-    def __init__(self, host_file, cmd=None, follow=False, block=False, wait=30, process_bar=False, logger=None, **kwds):
+    def __init__(self, host_file, cmd=None, follow=False, block=False, process_bar=False, logger=None, **kwds):
         super(CmdExecution, self).__init__()
         self.host_file = host_file
         self.cmd = cmd
         self.follow = follow
         self.process_bar = process_bar
-        self.wait = wait
         self.block = block
         self.results = 0
         self.msg_queue = Queue()
@@ -176,11 +189,10 @@ class CmdExecution(MultiThreadClosing):
         thread_list = []
         for cmd in cmds:
             thread_list.append(Thread(target=self.sub_thread_process, args=(host, cmd, sub_queue)))
-        now_time = time.time()
         for thread in thread_list:
+            self.threads.append(thread)
             thread.start()
-        while now_time + self.wait > time.time() and \
-                        sub_queue.qsize() < len(cmds) and \
+        while sub_queue.qsize() < len(cmds) and \
                 filter(lambda x:x.is_alive(), thread_list):
             time.sleep(1)
         while True:
@@ -251,9 +263,7 @@ class CmdExecution(MultiThreadClosing):
 
     def start(self):
         map(lambda x: x.start(), self._threads.values())
-        now_time = time.time()
-        while now_time + self.wait+1 > time.time() and \
-                        self.msg_queue.qsize() < self.results and \
+        while self.msg_queue.qsize() < self.results and \
                 filter(lambda x:x.is_alive(), self._threads.values()):
             time.sleep(1)
         while True:
@@ -276,8 +286,6 @@ class CmdExecution(MultiThreadClosing):
         sub_parsers = parser.add_subparsers(help="cmd", dest="cmd")
         base_parser.add_argument("--host_file", dest="host_file", default="host_file",
                                  help="settings of hosts")
-        base_parser.add_argument("-w", "--wait", dest="wait", default=10, type=int,
-                                 help="the time wait for cmd to execute")
         sftp_parser = sub_parsers.add_parser("sftp", parents=[base_parser],
                                              help="use sftp to send or receive files or floders to or from remote. ")
         sftp_parser.add_argument("-p", "--process-bar", action="store_true",
