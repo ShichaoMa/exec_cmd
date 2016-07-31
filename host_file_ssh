@@ -1,0 +1,3 @@
+# ssh 执行远程命令
+# 格式  host|port|user|password #6个空格# cmd1 #4个空格# cmd2 ...
+192.168.200.90|22|ubuntu|ubuntu      ps -ef|grep nginx    cd /home/ubuntu

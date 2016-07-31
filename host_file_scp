@@ -1,0 +1,4 @@
+# sftp 从90传送到88
+# 格式host|port|user|password|src_path #6个空格#  host|port|user|password|dest_path
+192.168.200.90|22|ubuntu|ubuntu|/home/ubuntu/a.txt      192.168.200.88|22|ubuntu|ubuntu|/home/ubuntu
+# ...
