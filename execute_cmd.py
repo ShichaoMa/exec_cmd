@@ -332,5 +332,6 @@ class CmdExecution(MultiThreadClosing):
 
 if __name__ == "__main__":
     CE = CmdExecution.parse_args()
+    CE.set_logger()
     CE.start()
 
