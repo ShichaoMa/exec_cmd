@@ -32,8 +32,8 @@ class CmdExecution(MultiThreadClosing):
 
     name = "cmd_execution"
 
-    def __init__(self, host_file, cmd=None, follow=False, block=True, process_bar=False, logger=None):
-        super(CmdExecution, self).__init__(logger)
+    def __init__(self, host_file, cmd=None, follow=False, block=True, process_bar=False):
+        super(CmdExecution, self).__init__()
         self.host_file = host_file
         self.cmd = cmd
         self.follow = follow
@@ -315,7 +315,7 @@ class CmdExecution(MultiThreadClosing):
         parser.add_argument('-h', '--help', action=ArgparseHelper, help='show this help message and exit')
         base_parser = ArgumentParser(add_help=False)
         sub_parsers = parser.add_subparsers(help="cmd", dest="cmd")
-        base_parser.add_argument("--host_file", dest="host_file", default="host_file",
+        base_parser.add_argument("--host-file", dest="host_file", default="host_file",
                                  help="settings of hosts")
         sftp_parser = sub_parsers.add_parser("sftp", parents=[base_parser],
                                              help="use sftp to send or receive files or floders to or from remote. ")
