@@ -11,6 +11,9 @@ from multi_thread_closing import MultiThreadClosing
 
 
 class ArgparseHelper(_HelpAction):
+    """
+        显示格式友好的帮助信息
+    """
 
     def __call__(self, parser, namespace, values, option_string=None):
         parser.print_help()
@@ -29,10 +32,8 @@ class CmdExecution(MultiThreadClosing):
 
     name = "cmd_execution"
 
-    def __init__(self, host_file, cmd=None, follow=False, block=False, process_bar=False, logger=None, **kwds):
-        super(CmdExecution, self).__init__()
-        if logger:
-            self.logger = logger
+    def __init__(self, host_file, cmd=None, follow=False, block=False, process_bar=False, logger=None):
+        super(CmdExecution, self).__init__(logger)
         self.host_file = host_file
         self.cmd = cmd
         self.follow = follow
@@ -47,6 +48,11 @@ class CmdExecution(MultiThreadClosing):
         self.setup()
 
     def parse_settings(self, buf=None):
+        """
+        解析hosts_file文件
+        :param buf: 可以是buf的形式传入
+        :return:
+        """
         if buf:
             fobj = StringIO(buf)
         else:
@@ -66,6 +72,11 @@ class CmdExecution(MultiThreadClosing):
         self.hosts_cmds[host] = cmds
 
     def setup(self, settings=None):
+        """
+        添加ssh 或 scp 线程
+        :param settings:
+        :return:
+        """
         self.parse_settings(settings)
         if self.cmd == "ssh":
             for host in self.hosts_cmds.keys():
@@ -123,6 +134,12 @@ class CmdExecution(MultiThreadClosing):
                 os.remove(temp_fn)
 
     def sftp_put_cb(self, src, dest):
+        """
+        进度条回调函数
+        :param src:
+        :param dest:
+        :return:
+        """
         def callback(size, file_size):
             percent = int(size*100/file_size)
             if self.process_bar:
@@ -133,6 +150,11 @@ class CmdExecution(MultiThreadClosing):
         return callback
 
     def cmd_one_by_one(self, hosts):
+        """
+        顺序执行命令
+        :param hosts:
+        :return:
+        """
         ssh = None
         try:
             cmds = map(lambda x:x[0], self.hosts_cmds[hosts])
@@ -183,6 +205,11 @@ class CmdExecution(MultiThreadClosing):
             self.logger.error(traceback.format_exc())
 
     def concurrent(self, host):
+        """
+        并发执行指令
+        :param host:
+        :return:
+        """
         cmds = map(lambda x:x[0], self.hosts_cmds[host])
         sub_queue = Queue()
         thread_list = []
@@ -231,6 +258,11 @@ class CmdExecution(MultiThreadClosing):
                 self.logger.error("failed! sftp from %s to %s" % item)
 
     def process_result(self, item):
+        """
+        处理结果
+        :param item:
+        :return:
+        """
         getattr(self, "%s_result"%self.cmd)(item)
 
     def sftp_result(self, item):
