@@ -1,10 +1,8 @@
 # -*- coding:utf-8 -*-
-import sys
 import os
 import paramiko
 import time
 import traceback
-import logging
 from StringIO import StringIO
 from Queue import Queue, Empty
 from threading import Thread, RLock, current_thread
@@ -33,6 +31,8 @@ class CmdExecution(MultiThreadClosing):
 
     def __init__(self, host_file, cmd=None, follow=False, block=False, process_bar=False, logger=None, **kwds):
         super(CmdExecution, self).__init__()
+        if logger:
+            self.logger = logger
         self.host_file = host_file
         self.cmd = cmd
         self.follow = follow
@@ -110,7 +110,7 @@ class CmdExecution(MultiThreadClosing):
                 if not os.path.exists("temp"):
                     os.mkdir("temp")
                 src_sftp.get(src, temp_fn)
-                dest_sftp.put(temp_fn, dest, callback=self.sftp_put_cb(src_host, dest_sftp))
+                dest_sftp.put(temp_fn, dest, callback=self.sftp_put_cb(src_host, dest_host))
             else:
                 dest_sftp.put(src, dest, callback=self.sftp_put_cb(src_host, dest_host))
             self.msg_queue.put(index)
@@ -171,7 +171,6 @@ class CmdExecution(MultiThreadClosing):
 
     def get_ssh(self, host, port, user, password):
         try:
-            print host, port, user, password
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(host, int(port), user, password)
@@ -229,14 +228,14 @@ class CmdExecution(MultiThreadClosing):
                     self.logger.error("cmd:%s"%cmd)
         for item in self.sftp_list:
             if item:
-                self.logger.error("failed! scp from %s to %s" % item)
+                self.logger.error("failed! sftp from %s to %s" % item)
 
     def process_result(self, item):
         getattr(self, "%s_result"%self.cmd)(item)
 
     def sftp_result(self, item):
         sucess_item = self.sftp_list[item]
-        self.logger.info("sucess! scp from %s to %s"%sucess_item)
+        self.logger.info("success! sftp from %s to %s"%sucess_item)
         self.sftp_list[item] = False
 
     def ssh_result(self, item):
@@ -246,23 +245,23 @@ class CmdExecution(MultiThreadClosing):
                 cmds = self.hosts_cmds[host]
                 self.hosts_cmds[host] = map(lambda x: (c, True) if x[0] == c else x, cmds)
         else:
-            cmds = self.hosts_cmds[host]
+            cmds = self.hosts_cmds[                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    host]
             self.hosts_cmds[host] = map(lambda x: (cmd, True) if x[0] == cmd else x, cmds)
         host, port, user, password = host.split("|")
         host = "%s@%s" % (user, host)
-        if out:
+        if out or err:
             self.logger.info("host:%s" % host)
             self.logger.info("cmd:%s" % cmd)
+        if out:
             for o in out:
                 self.logger.info(o.strip("\n"))
         if err:
-            self.logger.error("host:%s" % host)
-            self.logger.error("cmd:%s" % cmd)
             for e in err:
                 self.logger.error(e.strip("\n"))
 
     def start(self):
         map(lambda x: x.start(), self._threads.values())
+        time.sleep(.1)
         while self.msg_queue.qsize() < self.results and \
                 filter(lambda x:x.is_alive(), self._threads.values()):
             time.sleep(1)
