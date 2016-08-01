@@ -34,11 +34,11 @@ START
         Command 'ssh'
         usage: execute_cmd.py ssh [-h] [--host_file HOST_FILE] [-f] [-b]
 
-        --host_file 指定配置文件
+        # --host_file 指定配置文件
         # stfp 模式
-        -p 是否显示进度条
+        # -p 是否显示进度条
         # ssh 模式
-        # -f 每个远程主机指令集是否顺序执行，或同时执行
+        # -f 每个远程主机指令集是否顺序执行，或并发执行
         # -b 是否阻塞进程等待指令集执行完毕，并返回信息
     ```
 

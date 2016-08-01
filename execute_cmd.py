@@ -32,7 +32,7 @@ class CmdExecution(MultiThreadClosing):
 
     name = "cmd_execution"
 
-    def __init__(self, host_file, cmd=None, follow=False, block=False, process_bar=False, logger=None):
+    def __init__(self, host_file, cmd=None, follow=False, block=True, process_bar=False, logger=None):
         super(CmdExecution, self).__init__(logger)
         self.host_file = host_file
         self.cmd = cmd
@@ -162,7 +162,7 @@ class CmdExecution(MultiThreadClosing):
             ssh = self.get_ssh(host, port, user, password)
             cmd = ("%s &&"*len(cmds))[:-2]%tuple(cmds)
             stdin, stdout, stderr = ssh.exec_command(cmd)
-            if not self.block:
+            if self.block:
                 out, err = stdout.readlines(), stderr.readlines()
             else:
                 out, err = "", ""
