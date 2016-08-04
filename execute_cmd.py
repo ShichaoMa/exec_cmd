@@ -32,8 +32,15 @@ class CmdExecution(MultiThreadClosing):
 
     name = "cmd_execution"
 
-    def __init__(self, host_file, cmd=None, follow=False, block=True, process_bar=False):
+    def __init__(self, host_file=None, cmd=None, follow=False, block=True,
+                 process_bar=False, host=None, port=None, password=None,
+                 user=None, command=None):
         super(CmdExecution, self).__init__()
+        self.host = host
+        self.port = port
+        self.pwd = password
+        self.user = user
+        self.command = command
         self.host_file = host_file
         self.cmd = cmd
         self.follow = follow
@@ -77,6 +84,8 @@ class CmdExecution(MultiThreadClosing):
         :param settings:
         :return:
         """
+        if self.cmd == "smc":
+            return
         self.parse_settings(settings)
         if self.cmd == "ssh":
             for host in self.hosts_cmds.keys():
@@ -292,19 +301,29 @@ class CmdExecution(MultiThreadClosing):
                 self.logger.error(e.strip("\n"))
 
     def start(self):
-        map(lambda x: x.start(), self._threads.values())
-        time.sleep(.1)
-        while self.msg_queue.qsize() < self.results and \
-                filter(lambda x:x.is_alive(), self._threads.values()):
-            time.sleep(1)
-        while True:
+        if self.cmd =="smc":
+            ssh = None
             try:
-                item = self.msg_queue.get_nowait()
-                self.process_result(item)
-            except Empty:
-                break
-        self.format_hosts_cmds()
-        return self.hosts_cmds or self.sftp_list
+                ssh = self.get_ssh(self.host, self.port, self.user, self.pwd)
+                stdin, stdout, stderr = ssh.exec_command(self.command)
+                for line in stdout.readlines() + stderr.readlines():
+                    self.logger.info(line.strip())
+            finally:
+                if ssh: ssh.close()
+        else:
+            map(lambda x: x.start(), self._threads.values())
+            time.sleep(.1)
+            while self.msg_queue.qsize() < self.results and \
+                    filter(lambda x:x.is_alive(), self._threads.values()):
+                time.sleep(1)
+            while True:
+                try:
+                    item = self.msg_queue.get_nowait()
+                    self.process_result(item)
+                except Empty:
+                    break
+            self.format_hosts_cmds()
+            return self.hosts_cmds or self.sftp_list
 
     @classmethod
     def parse_args(cls):
@@ -321,6 +340,12 @@ class CmdExecution(MultiThreadClosing):
                                              help="use sftp to send or receive files or floders to or from remote. ")
         sftp_parser.add_argument("-p", "--process-bar", action="store_true",
                                  dest="process_bar", help="show process bar")
+        smc_parser = sub_parsers.add_parser("smc", help="simple cmd to execute. ")
+        smc_parser.add_argument("--host", dest="host", help="host", required=True)
+        smc_parser.add_argument("--port", dest="port", help="port", type=int, default=22)
+        smc_parser.add_argument("-u", "--user", dest="user", help="user", required=True)
+        smc_parser.add_argument("-p", "--pwd", dest="password", help="password", required=True)
+        smc_parser.add_argument("-c", "--command", dest="command", help="command", required=True)
         ssh_parser = sub_parsers.add_parser("ssh", parents=[base_parser],
                                             help="use ssh execute cmd in remote. ")
         ssh_parser.add_argument("-f", "--follow", dest="follow", action="store_true",

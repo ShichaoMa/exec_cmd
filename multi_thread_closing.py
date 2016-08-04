@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import os
 import sys
 import ctypes
 import signal
@@ -28,8 +29,10 @@ class MultiThreadClosing(object):
     def stop(self, *args):
         if self.int_signal_count > 1:
             self.logger.info("force to terminate all the threads...")
-            for th in self.threads[:]:
-                self.stop_thread(th)
+            # for th in self.threads[:]:
+            #     self.stop_thread(th)
+            pid = os.getpid()
+            os.kill(pid, 9)
 
         else:
             self.alive = False
@@ -49,7 +52,7 @@ class MultiThreadClosing(object):
         if not inspect.isclass(exctype):
             exctype = type(exctype)
         res = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(exctype))
-        self.logger.debug("stop thread %s. "%name)
+        self.logger.info("stop thread %s. "%name)
         if res == 0:
             self.logger.error("invalid thread id")
             raise ValueError("invalid thread id")
