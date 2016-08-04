@@ -6,7 +6,7 @@
 git clone https://github.com/ShichaoMa/exec_cmd.git
 sudo pip install -r requirements.txt
 ```
-##START
+#START
 
 ```bash
 ubuntu@dev:~/myprojects/exec_cmd$ python execute_cmd.py -h
