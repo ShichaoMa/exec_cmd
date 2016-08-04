@@ -36,16 +36,16 @@ usage: execute_cmd.py ssh [-h] [--host-file HOST_FILE] [-f] [-b]
 
 ##DESCRIPTION
 
---host_file 指定配置文件 参见[host_file_ssh](https://github.com/ShichaoMa/exec_cmd/blob/master/host_file_ssh) [host_file_sftp](https://github.com/ShichaoMa/exec_cmd/blob/master/host_file_sftp)
+--host_file 指定配置文件 格式参见：<br/>[host_file_ssh](https://github.com/ShichaoMa/exec_cmd/blob/master/host_file_ssh)<br/> [host_file_sftp](https://github.com/ShichaoMa/exec_cmd/blob/master/host_file_sftp)
 #stfp 模式
--p 是否显示进度条
+-p 是否显示进度条<br/>
 #ssh 模式
--f 每个远程主机指令集是否顺序执行，或并发执行
--b 是否阻塞进程等待指令集执行完毕，并返回信息
+-f 每个远程主机指令集是否顺序执行，或并发执行<br/>
+-b 是否阻塞进程等待指令集执行完毕，并返回信息<br/>
 #smc 简单命令执行
---host host
---port port
--u username
--p password
--c command
+--host host<br/>
+--port port<br/>
+-u username<br/>
+-p password<br/>
+-c command<br/>
 
