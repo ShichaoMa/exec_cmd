@@ -171,7 +171,7 @@ class CmdExecution(MultiThreadClosing):
             ssh = self.get_ssh(host, port, user, password)
             cmd = ("%s &&"*len(cmds))[:-2]%tuple(cmds)
             stdin, stdout, stderr = ssh.exec_command(cmd)
-            if self.block:
+            if not self.block:
                 out, err = stdout.readlines(), stderr.readlines()
             else:
                 out, err = "", ""
@@ -316,12 +316,12 @@ class CmdExecution(MultiThreadClosing):
             while self.msg_queue.qsize() < self.results and \
                     filter(lambda x:x.is_alive(), self._threads.values()):
                 time.sleep(1)
-            while True:
-                try:
-                    item = self.msg_queue.get_nowait()
-                    self.process_result(item)
-                except Empty:
-                    break
+                while True:
+                    try:
+                        item = self.msg_queue.get_nowait()
+                        self.process_result(item)
+                    except Empty:
+                        break
             self.format_hosts_cmds()
             return self.hosts_cmds or self.sftp_list
 
