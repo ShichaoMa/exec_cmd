@@ -182,8 +182,8 @@ class CmdExecution(MultiThreadClosing):
             if ssh:ssh.close()
 
     def get_sftp(self, src):
+        host = "local"
         try:
-            host = "local"
             if src.count("|") == 4:
                 host, port, user, password, path = map(lambda x:x.strip(), src.split("|"))
                 t = paramiko.Transport((host, int(port)))
@@ -198,7 +198,7 @@ class CmdExecution(MultiThreadClosing):
             self.logger.error("host:%s, port:%s, user:%s, password:%s" % (host, port, user, password))
             exit(1)
         except Exception:
-            self.logger.error(traceback.format_exc())
+            self.logger.error("error heppened in %s Error:%s"%(host, traceback.format_exc()))
 
     def get_ssh(self, host, port, user, password):
         try:
@@ -211,7 +211,7 @@ class CmdExecution(MultiThreadClosing):
             self.logger.error("host:%s, port:%s, user:%s, password:%s"%(host, port, user, password))
             exit(1)
         except Exception:
-            self.logger.error(traceback.format_exc())
+            self.logger.error("error heppened in %s Error:%s"%(host, traceback.format_exc()))
 
     def concurrent(self, host):
         """
@@ -249,7 +249,7 @@ class CmdExecution(MultiThreadClosing):
                 out, err = "", ""
             sub_queue.put((hosts, cmd, out, err))
         except Exception:
-            self.logger.error(traceback.format_exc())
+            self.logger.error("error heppened in %s Error:%s"%(hosts, traceback.format_exc()))
         finally:
             ssh.close()
 
