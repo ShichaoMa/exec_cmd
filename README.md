@@ -3,8 +3,12 @@
 #INSTALL
 ##ubuntu
 ```bash
-git clone https://github.com/ShichaoMa/exec_cmd.git
-sudo pip install -r requirements.txt
+    git clone https://github.com/ShichaoMa/exec_cmd.git
+    sudo python setup.py  install
+
+    or
+
+    sudo pip install executecmd
 ```
 #START
 

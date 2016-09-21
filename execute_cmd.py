@@ -10,6 +10,15 @@ from argparse import ArgumentParser, _HelpAction, _SubParsersAction
 from multi_thread_closing import MultiThreadClosing
 
 
+VERSION = '1.0.1'
+
+AUTHOR = "cn"
+
+AUTHOR_EMAIL = "308299269@qq.com"
+
+URL = "https://www.github.com/ShichaoMa/exec_cmd"
+
+
 class ArgparseHelper(_HelpAction):
     """
         显示格式友好的帮助信息
@@ -355,8 +364,12 @@ class CmdExecution(MultiThreadClosing):
         return cls(**vars(parser.parse_args()))
 
 
-if __name__ == "__main__":
+def main():
     CE = CmdExecution.parse_args()
     CE.set_logger()
     CE.start()
+
+
+if __name__ == "__main__":
+    main()
 
