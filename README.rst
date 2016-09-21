@@ -46,7 +46,7 @@ DESCRIPTION
 - --host_file 指定配置文件 格式参见: ssh_, scp_。
     .. _ssh: https://github.com/ShichaoMa/exec_cmd/blob/master/host_file_ssh
     .. _scp: https://github.com/ShichaoMa/exec_cmd/blob/master/host_file_sftp
-    -stfp 模式
+    - stfp 模式
         - -p 是否显示进度条
     - ssh 模式
         - -f 每个远程主机指令集是否顺序执行，或并发执行
