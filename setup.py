@@ -6,7 +6,14 @@ try:
 except:
     from distutils.core import setup
 
-from execute_cmd import AUTHOR, AUTHOR_EMAIL, VERSION, URL
+
+VERSION = '1.0.6'
+
+AUTHOR = "cn"
+
+AUTHOR_EMAIL = "308299269@qq.com"
+
+URL = "https://www.github.com/ShichaoMa/exec_cmd"
 
 
 def read(fname):
@@ -46,7 +53,7 @@ setup(
     url = URL,
     license = LICENSE,
     py_modules = MODULES,
-    install_requires=["multi-thread-closing", "paramiko==2.0.2"],
+    install_requires=["paramiko==2.0.2", "multi-thread-closing==1.0.1", ],
     include_package_data=True,
     zip_safe=True,
 )

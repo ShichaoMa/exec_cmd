@@ -10,15 +10,6 @@ from argparse import ArgumentParser, _HelpAction, _SubParsersAction
 from multi_thread_closing import MultiThreadClosing
 
 
-VERSION = '1.0.1'
-
-AUTHOR = "cn"
-
-AUTHOR_EMAIL = "308299269@qq.com"
-
-URL = "https://www.github.com/ShichaoMa/exec_cmd"
-
-
 class ArgparseHelper(_HelpAction):
     """
         显示格式友好的帮助信息

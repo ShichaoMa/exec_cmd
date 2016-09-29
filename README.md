@@ -13,29 +13,29 @@
 #START
 
 ```bash
-ubuntu@dev:~/myprojects/exec_cmd$ python execute_cmd.py -h
-usage: execute_cmd.py [-h] {sftp,smc,ssh} ...
+    ubuntu@dev:~$ exec-cmd -h
+    usage: exec-cmd [-h] {sftp,smc,ssh} ...
 
-ssh or sftp cmd execute.
+    ssh or sftp cmd execute.
 
-positional arguments:
-  {sftp,smc,ssh}  cmd
-    sftp          use sftp to send or receive files or floders to or from
-                  remote.
-    smc           simple cmd to execute.
-    ssh           use ssh execute cmd in remote.
+    positional arguments:
+      {sftp,smc,ssh}  cmd
+        sftp          use sftp to send or receive files or floders to or from
+                      remote.
+        smc           simple cmd to execute.
+        ssh           use ssh execute cmd in remote.
 
-optional arguments:
-  -h, --help      show this help message and exit
-Command 'sftp'
-usage: execute_cmd.py sftp [-h] [--host-file HOST_FILE] [-p]
+    optional arguments:
+      -h, --help      show this help message and exit
+    Command 'sftp'
+    usage: exec-cmd sftp [-h] [--host-file HOST_FILE] [-p]
 
-Command 'smc'
-usage: execute_cmd.py smc [-h] --host HOST [--port PORT] -u USER -p PASSWORD
-                          -c COMMAND
+    Command 'smc'
+    usage: exec-cmd smc [-h] --host HOST [--port PORT] -u USER -p PASSWORD -c
+                        COMMAND
 
-Command 'ssh'
-usage: execute_cmd.py ssh [-h] [--host-file HOST_FILE] [-f] [-b]
+    Command 'ssh'
+    usage: exec-cmd ssh [-h] [--host-file HOST_FILE] [-f] [-b]
 ```
 
 #DESCRIPTION
