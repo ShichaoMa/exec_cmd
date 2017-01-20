@@ -1,13 +1,20 @@
 # -*- coding:utf-8 -*-
 import os
-import paramiko
+import sys
 import time
+import paramiko
 import traceback
-from StringIO import StringIO
-from Queue import Queue, Empty
 from threading import Thread, RLock, current_thread
 from argparse import ArgumentParser, _HelpAction, _SubParsersAction
+
 from multi_thread_closing import MultiThreadClosing
+
+if sys.version_info >= (3, 0, 0):
+    from io import StringIO
+    from queue import Queue, Empty
+else:
+    from StringIO import StringIO
+    from Queue import Queue, Empty
 
 
 class ArgparseHelper(_HelpAction):
@@ -64,7 +71,7 @@ class CmdExecution(MultiThreadClosing):
             fobj = StringIO(buf)
         else:
             fobj = open(self.host_file)
-        for line in fobj.xreadlines():
+        for line in fobj.readlines():
             line = line.strip("\357\273\277\r\n")
             if line.startswith("#") or not line:
                 continue
@@ -75,7 +82,7 @@ class CmdExecution(MultiThreadClosing):
 
     def parser_ssh(self, line):
         host, cmds = line.split("      ")
-        cmds = map(lambda x:(x.strip(), False), cmds.split("    "))
+        cmds = [(x.strip(), False) for x in cmds.split("    ")]
         self.hosts_cmds[host] = cmds
 
     def setup(self, settings=None):
@@ -166,7 +173,7 @@ class CmdExecution(MultiThreadClosing):
         """
         ssh = None
         try:
-            cmds = map(lambda x:x[0], self.hosts_cmds[hosts])
+            cmds = [x[0] for x in self.hosts_cmds[hosts]]
             host, port, user, password = hosts.split("|")
             ssh = self.get_ssh(host, port, user, password)
             cmd = ("%s &&"*len(cmds))[:-2]%tuple(cmds)
@@ -185,7 +192,7 @@ class CmdExecution(MultiThreadClosing):
         host = "local"
         try:
             if src.count("|") == 4:
-                host, port, user, password, path = map(lambda x:x.strip(), src.split("|"))
+                host, port, user, password, path = [x.strip() for x in src.split("|")]
                 t = paramiko.Transport((host, int(port)))
                 t.connect(username=user, password=password)
                 sftp = paramiko.SFTPClient.from_transport(t)
@@ -219,7 +226,7 @@ class CmdExecution(MultiThreadClosing):
         :param host:
         :return:
         """
-        cmds = map(lambda x:x[0], self.hosts_cmds[host])
+        cmds = [x[0] for x in self.hosts_cmds[host]]
         sub_queue = Queue()
         thread_list = []
         for cmd in cmds:
@@ -227,8 +234,7 @@ class CmdExecution(MultiThreadClosing):
         for thread in thread_list:
             self.threads.append(thread)
             thread.start()
-        while sub_queue.qsize() < len(cmds) and \
-                filter(lambda x:x.is_alive(), thread_list):
+        while sub_queue.qsize() < len(cmds) and [x for x in thread_list if x.is_alive()]:
             time.sleep(1)
         while True:
             try:
@@ -237,6 +243,7 @@ class CmdExecution(MultiThreadClosing):
                 break
 
     def sub_thread_process(self, hosts, cmd, sub_queue):
+        ssh = None
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -251,7 +258,8 @@ class CmdExecution(MultiThreadClosing):
         except Exception:
             self.logger.error("error heppened in %s Error:%s"%(hosts, traceback.format_exc()))
         finally:
-            ssh.close()
+            if ssh:
+                ssh.close()
 
     def format_hosts_cmds(self):
         for host, cmds in self.hosts_cmds.items():
@@ -284,10 +292,10 @@ class CmdExecution(MultiThreadClosing):
         if isinstance(cmd, list):
             for c in cmd:
                 cmds = self.hosts_cmds[host]
-                self.hosts_cmds[host] = map(lambda x: (c, True) if x[0] == c else x, cmds)
+                self.hosts_cmds[host] = [(c, True) if x[0] == c else x for x in cmds]
         else:
             cmds = self.hosts_cmds[                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    host]
-            self.hosts_cmds[host] = map(lambda x: (cmd, True) if x[0] == cmd else x, cmds)
+            self.hosts_cmds[host] = [(cmd, True) if x[0] == cmd else x for x in cmds]
         host, port, user, password = host.split("|")
         host = "%s@%s" % (user, host)
         if out or err:
@@ -311,10 +319,10 @@ class CmdExecution(MultiThreadClosing):
             finally:
                 if ssh: ssh.close()
         else:
-            map(lambda x: x.start(), self._threads.values())
+            for i in self._threads.values():
+                i.start()
             time.sleep(.1)
-            while self.msg_queue.qsize() < self.results and \
-                    filter(lambda x:x.is_alive(), self._threads.values()):
+            while self.msg_queue.qsize() < self.results and [x for x in self._threads.values() if x.is_alive()]:
                 time.sleep(1)
                 while True:
                     try:
@@ -333,9 +341,8 @@ class CmdExecution(MultiThreadClosing):
         parser = ArgumentParser(description=CmdExecution.parse_args.__doc__, add_help=False)
         parser.add_argument('-h', '--help', action=ArgparseHelper, help='show this help message and exit')
         base_parser = ArgumentParser(add_help=False)
-        sub_parsers = parser.add_subparsers(help="cmd", dest="cmd")
-        base_parser.add_argument("--host-file", dest="host_file", default="host_file",
-                                 help="settings of hosts")
+        sub_parsers = parser.add_subparsers(help="Command. ", dest="cmd")
+        base_parser.add_argument("host_file", help="settings of hosts")
         sftp_parser = sub_parsers.add_parser("sftp", parents=[base_parser],
                                              help="use sftp to send or receive files or floders to or from remote. ")
         sftp_parser.add_argument("-p", "--process-bar", action="store_true",
