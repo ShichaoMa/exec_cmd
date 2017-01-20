@@ -14,12 +14,12 @@
 
 ```bash
     ubuntu@dev:~$ exec-cmd -h
-    usage: exec-cmd [-h] {sftp,smc,ssh} ...
+    usage: execute_cmd.py [-h] {sftp,smc,ssh} ...
 
     ssh or sftp cmd execute.
 
     positional arguments:
-      {sftp,smc,ssh}  cmd
+      {sftp,smc,ssh}  Command.
         sftp          use sftp to send or receive files or floders to or from
                       remote.
         smc           simple cmd to execute.
@@ -28,14 +28,14 @@
     optional arguments:
       -h, --help      show this help message and exit
     Command 'sftp'
-    usage: exec-cmd sftp [-h] [--host-file HOST_FILE] [-p]
-
+    usage: execute_cmd.py sftp [-h] [-p] host_file
+    
     Command 'smc'
-    usage: exec-cmd smc [-h] --host HOST [--port PORT] -u USER -p PASSWORD -c
-                        COMMAND
+    usage: execute_cmd.py smc [-h] --host HOST [--port PORT] -u USER -p PASSWORD
+                              -c COMMAND
 
     Command 'ssh'
-    usage: exec-cmd ssh [-h] [--host-file HOST_FILE] [-f] [-b]
+    usage: execute_cmd.py ssh [-h] [-f] [-b] host_file
 ```
 
 #DESCRIPTION
