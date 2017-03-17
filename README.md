@@ -29,7 +29,7 @@
       -h, --help      show this help message and exit
     Command 'sftp'
     usage: execute_cmd.py sftp [-h] [-p] host_file
-    
+
     Command 'smc'
     usage: execute_cmd.py smc [-h] --host HOST [--port PORT] -u USER -p PASSWORD
                               -c COMMAND

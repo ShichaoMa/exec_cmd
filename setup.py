@@ -1,13 +1,11 @@
 # -*- coding:utf-8 -*-
-import codecs
-import os
 try:
     from setuptools import setup, find_packages
 except:
     from distutils.core import setup
 
 
-VERSION = '1.0.6'
+VERSION = '1.0.7'
 
 AUTHOR = "cn"
 
@@ -15,15 +13,14 @@ AUTHOR_EMAIL = "308299269@qq.com"
 
 URL = "https://www.github.com/ShichaoMa/exec_cmd"
 
-
-def read(fname):
-    return codecs.open(os.path.join(os.path.dirname(__file__), fname)).read()
-
 NAME = "executecmd"
 
 DESCRIPTION = "execute remote command. "
 
-LONG_DESCRIPTION = read("README.rst")
+try:
+    LONG_DESCRIPTION = open("README.rst").read()
+except UnicodeDecodeError:
+    LONG_DESCRIPTION = open("README.rst", encoding="utf-8").read()
 
 KEYWORDS = "execute command"
 
