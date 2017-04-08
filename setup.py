@@ -9,7 +9,7 @@ VERSION = '1.0.7'
 
 AUTHOR = "cn"
 
-AUTHOR_EMAIL = "308299269@qq.com"
+AUTHOR_EMAIL = "cnaafhvk@foxmail.com"
 
 URL = "https://www.github.com/ShichaoMa/exec_cmd"
 
