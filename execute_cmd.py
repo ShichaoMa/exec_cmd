@@ -128,13 +128,13 @@ class CmdExecution(MultiThreadClosing):
         src_sftp, src, src_host = self.get_sftp(pair[0])
         dest_sftp, dest, dest_host = self.get_sftp(pair[1])
         src = src.strip()
-        filename = src[src.rfind(os.sep)+1:]
+        filename = os.path.basename(src)
         temp_fn = ""
         try:
             if not dest.endswith(filename):
                 dest = os.path.join(dest, filename)
             if src_sftp:
-                temp_fn = "temp%s%s"%(os.sep, src[src.rfind(os.sep) + 1:] + current_thread().getName())
+                temp_fn = os.path.join("temp", filename + current_thread().getName())
                 if not os.path.exists("temp"):
                     os.mkdir("temp")
                 src_sftp.get(src, temp_fn)
