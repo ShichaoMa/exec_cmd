@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import shutil
 import paramiko
 import traceback
 from threading import Thread, RLock, current_thread
@@ -127,25 +128,32 @@ class CmdExecution(MultiThreadClosing):
         src_sftp, src, src_host = self.get_sftp(pair[0])
         dest_sftp, dest, dest_host = self.get_sftp(pair[1])
         src = src.strip()
-        filename = src[src.rfind("/")+1:]
+        filename = src[src.rfind(os.sep)+1:]
         temp_fn = ""
         try:
-            if dest.endswith("/"):
-                dest = "%s%s" % (dest, filename)
+            if not dest.endswith(filename):
+                dest = os.path.join(dest, filename)
             if src_sftp:
-                temp_fn = "temp/%s"%(src[src.rfind("/") + 1:] + current_thread().getName())
+                temp_fn = "temp%s%s"%(os.sep, src[src.rfind(os.sep) + 1:] + current_thread().getName())
                 if not os.path.exists("temp"):
                     os.mkdir("temp")
                 src_sftp.get(src, temp_fn)
-                dest_sftp.put(temp_fn, dest, callback=self.sftp_put_cb(src_host, dest_host))
-            else:
+                if dest_sftp:
+                    dest_sftp.put(temp_fn, dest, callback=self.sftp_put_cb(src_host, dest_host))
+                else:
+                    shutil.move(temp_fn, dest)
+            elif dest_sftp:
                 dest_sftp.put(src, dest, callback=self.sftp_put_cb(src_host, dest_host))
+            else:
+                shutil.move(src, dest)
             self.msg_queue.put(index)
         except Exception:
             self.logger.error(traceback.format_exc())
         finally:
-            if src_sftp:src_sftp.close()
-            dest_sftp.close()
+            if src_sftp:
+                src_sftp.close()
+            if dest_sftp:
+                dest_sftp.close()
             if os.path.exists(temp_fn):
                 os.remove(temp_fn)
 
@@ -189,7 +197,7 @@ class CmdExecution(MultiThreadClosing):
             if ssh:ssh.close()
 
     def get_sftp(self, src):
-        host = "local"
+        host, port, user, password, path = "local", None, None, None, None
         try:
             if src.count("|") == 4:
                 host, port, user, password, path = [x.strip() for x in src.split("|")]
@@ -283,8 +291,8 @@ class CmdExecution(MultiThreadClosing):
         getattr(self, "%s_result"%self.cmd)(item)
 
     def sftp_result(self, item):
-        sucess_item = self.sftp_list[item]
-        self.logger.info("success! sftp from %s to %s"%sucess_item)
+        success_item = self.sftp_list[item]
+        self.logger.info("success! sftp from %s to %s"%tuple(success_item))
         self.sftp_list[item] = False
 
     def ssh_result(self, item):
@@ -303,10 +311,10 @@ class CmdExecution(MultiThreadClosing):
             self.logger.info("cmd:%s" % cmd)
         if out:
             for o in out:
-                self.logger.info(o.strip("\n"))
+                self.logger.info(o.strip("\n\r"))
         if err:
             for e in err:
-                self.logger.error(e.strip("\n"))
+                self.logger.error(e.strip("\n\r"))
 
     def start(self):
         if self.cmd =="smc":
