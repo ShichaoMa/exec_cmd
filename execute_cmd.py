@@ -145,7 +145,7 @@ class CmdExecution(MultiThreadClosing):
             elif dest_sftp:
                 dest_sftp.put(src, dest, callback=self.sftp_put_cb(src_host, dest_host))
             else:
-                shutil.move(src, dest)
+                shutil.copytree(src, dest)
             self.msg_queue.put(index)
         except Exception:
             self.logger.error(traceback.format_exc())
@@ -332,12 +332,12 @@ class CmdExecution(MultiThreadClosing):
             time.sleep(.1)
             while self.msg_queue.qsize() < self.results and [x for x in self._threads.values() if x.is_alive()]:
                 time.sleep(1)
-                while True:
-                    try:
-                        item = self.msg_queue.get_nowait()
-                        self.process_result(item)
-                    except Empty:
-                        break
+            while True:
+                try:
+                    item = self.msg_queue.get_nowait()
+                    self.process_result(item)
+                except Empty:
+                    break
             self.format_hosts_cmds()
             return self.hosts_cmds or self.sftp_list
 
