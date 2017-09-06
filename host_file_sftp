@@ -1,4 +1,6 @@
 # sftp 从90传送到58
 # 格式host|port|user|password|src_path #6个空格#  host|port|user|password|dest_path
 192.168.200.90|22|ubuntu|ubuntu|/home/ubuntu/nohup.out      192.168.200.58|22|ubuntu|ubuntu|/home/ubuntu/nohup.out
+# 如果源主机或目标主机是当前主机，则如下配置
+/home/ubuntu/nohup.out      /home/dev/nohup.out
 # ...
