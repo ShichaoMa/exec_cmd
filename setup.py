@@ -50,7 +50,7 @@ setup(
     url = URL,
     license = LICENSE,
     py_modules = MODULES,
-    install_requires=["paramiko==2.0.2", "multi-thread-closing==1.0.1"],
+    install_requires=["paramiko==3.4.0", "multi-thread-closing==1.0.1"],
     include_package_data=True,
     zip_safe=True,
 )
